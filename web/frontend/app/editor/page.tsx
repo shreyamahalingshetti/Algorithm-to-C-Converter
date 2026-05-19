@@ -55,18 +55,18 @@ export default function EditorPage() {
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex justify-between items-end mb-6"
+        className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4 md:gap-0"
       >
         <div>
           <h1 className="text-3xl font-bold gradient-text mb-2">Pseudo-code Editor</h1>
           <p className="text-zinc-400">Write your algorithm or load an example to begin.</p>
         </div>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full md:w-auto">
           <select 
             onChange={loadExample}
             defaultValue=""
-            className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none transition-colors"
+            className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white outline-none focus:ring-2 focus:ring-blue-500 appearance-none w-full sm:w-auto"
           >
             <option value="" disabled>Load Example...</option>
             {Object.keys(EXAMPLES).map(ex => (
@@ -77,7 +77,7 @@ export default function EditorPage() {
           <button
             onClick={handleTokenize}
             disabled={isTokenizing || !code.trim()}
-            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg flex items-center space-x-2 transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg flex items-center justify-center space-x-2 transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             {isTokenizing ? (
               <span className="animate-pulse">Processing...</span>

@@ -52,17 +52,17 @@ export default function ParserPage() {
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex justify-between items-end mb-8"
+        className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4 md:gap-0"
       >
         <div>
           <h1 className="text-3xl font-bold gradient-text mb-2">Syntax Analysis</h1>
           <p className="text-zinc-400">Context Free Grammar validation.</p>
         </div>
         
-        <div className="flex space-x-4">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full md:w-auto">
           <button
             onClick={() => router.push("/lexer")}
-            className="px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-medium rounded-lg flex items-center space-x-2 transition-colors border border-zinc-700"
+            className="px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-medium rounded-lg flex items-center justify-center space-x-2 transition-colors border border-zinc-700 w-full sm:w-auto"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
@@ -71,7 +71,7 @@ export default function ParserPage() {
           <button
             onClick={handleNext}
             disabled={!isValid}
-            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg flex items-center space-x-2 transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg flex items-center justify-center space-x-2 transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             <span>View Parse Tree</span>
             <ArrowRight className="w-4 h-4" />
@@ -79,12 +79,12 @@ export default function ParserPage() {
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="flex flex-col md:flex-row gap-6 mb-8">
         {/* Status Card */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className={`md:col-span-1 p-6 rounded-2xl border flex flex-col items-center justify-center text-center ${
+          className={`md:w-1/3 p-6 rounded-2xl border flex flex-col items-center justify-center text-center ${
             isValid 
               ? "glass border-green-500/30 bg-green-500/5 shadow-[0_0_30px_rgba(34,197,94,0.1)]" 
               : "glass border-red-500/30 bg-red-500/5 shadow-[0_0_30px_rgba(239,68,68,0.1)]"

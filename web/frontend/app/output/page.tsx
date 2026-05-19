@@ -61,17 +61,17 @@ export default function OutputPage() {
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex justify-between items-end mb-8"
+        className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4 md:gap-0"
       >
         <div>
           <h1 className="text-3xl font-bold gradient-text mb-2">Execution Output</h1>
           <p className="text-zinc-400">Run the generated C code in a sandboxed environment.</p>
         </div>
         
-        <div className="flex space-x-4">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full md:w-auto">
           <button
             onClick={() => router.push("/codegen")}
-            className="px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-medium rounded-lg flex items-center space-x-2 transition-colors border border-zinc-700"
+            className="px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-medium rounded-lg flex items-center justify-center space-x-2 transition-colors border border-zinc-700 w-full sm:w-auto"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
@@ -106,7 +106,7 @@ export default function OutputPage() {
 
           <button
             onClick={handleRun}
-            disabled={isRunning}
+            disabled={isRunning || !cCode}
             className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg flex justify-center items-center space-x-2 transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] disabled:opacity-50"
           >
             {isRunning ? (

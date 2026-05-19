@@ -21,20 +21,20 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 glass border-b border-zinc-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
+        <div className="flex flex-col md:flex-row md:items-center justify-between py-3 md:py-0 md:h-16 gap-3 md:gap-0">
+          <div className="flex items-center justify-between w-full md:w-auto">
             <Link href="/" className="flex items-center space-x-2 shrink-0">
               <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]">
                 C
               </div>
-              <span className="font-bold text-xl gradient-text tracking-tight hidden sm:block">
+              <span className="font-bold text-xl gradient-text tracking-tight block">
                 AutoC
               </span>
             </Link>
           </div>
           
-          <div className="hidden md:block overflow-x-auto">
-            <div className="flex items-baseline space-x-1">
+          <div className="w-full md:w-auto overflow-x-auto pb-1 md:pb-0 scrollbar-hide">
+            <div className="flex items-center space-x-1 min-w-max">
               {navLinks.map((link) => {
                 const isActive = pathname === link.path;
                 const Icon = link.icon;
