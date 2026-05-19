@@ -141,7 +141,8 @@ export default function ParseTreePage() {
     setIsGenerating(true);
     try {
       // Re-parse with generateC = true (or we could just use the AST we already have, but the backend does it together easily)
-      const res = await fetch("http://localhost:3001/api/parse", {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+      const res = await fetch(`${API_URL}/api/parse`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: useStore.getState().code, generateC: true })

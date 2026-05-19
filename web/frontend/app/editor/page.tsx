@@ -32,7 +32,8 @@ export default function EditorPage() {
     setIsTokenizing(true);
     try {
       // Assuming backend is running on 3001
-      const res = await fetch("http://localhost:3001/api/tokenize", {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+      const res = await fetch(`${API_URL}/api/tokenize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code })
