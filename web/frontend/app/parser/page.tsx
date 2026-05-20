@@ -6,23 +6,34 @@ import { useStore } from "@/store/useStore";
 import { ArrowRight, ArrowLeft, FileText, CheckCircle2, XCircle } from "lucide-react";
 
 const CFG_RULES = [
-  "Program → START Statements STOP",
+  "Program → START Declarations Statements STOP",
+  "Declarations → Declaration Declarations | ε",
+  "Declaration → DataType ID | ARRAY ID [ NUMBER ]",
+  "DataType → INT | FLOAT | CHAR | STRING",
   "Statements → Statement Statements | ε",
   "Statement → READ idList",
   "Statement → PRINT expr",
-  "Statement → ID = expr",
+  "Statement → ID = expr | ArrayIndex = expr",
   "Statement → IF condition THEN Statements [ELSE Statements] ENDIF",
   "Statement → FOR ID = expr TO expr Statements ENDFOR",
   "Statement → WHILE condition DO Statements ENDWHILE",
+  "Statement → SWITCH (expr) Cases ENDSWITCH",
+  "Statement → REPEAT Statements UNTIL condition",
+  "Statement → FUNCTION ID ( params ) Statements ENDFUNCTION",
+  "Statement → RETURN expr",
+  "Cases → Case Cases | DefaultCase | ε",
+  "Case → CASE expr : Statements [BREAK]",
+  "DefaultCase → DEFAULT : Statements",
   "condition → expr (==|!=|>|<|>=|<=) expr",
   "expr → term ((+|-) term)*",
   "term → factor ((*|/) factor)*",
-  "factor → ID | NUMBER | ( expr )",
+  "factor → ID | ArrayIndex | NUMBER | ( expr )",
+  "ArrayIndex → ID [ expr ]",
 ];
 
 export default function ParserPage() {
   const router = useRouter();
-  const { parseTree, parseErrors, variables } = useStore();
+  const { parseTree, parseErrors, variables, symbolTable } = useStore();
 
   const handleNext = () => {
     router.push("/tree");
@@ -127,11 +138,22 @@ export default function ParserPage() {
               Variables Detected (Symbol Table)
             </h3>
             <div className="flex flex-wrap gap-2">
-              {variables.map((v, i) => (
-                <span key={i} className="px-3 py-1 bg-blue-500/10 border border-blue-500/30 text-blue-300 rounded-md font-mono">
-                  int {v}
-                </span>
-              ))}
+              {variables.map((v, i) => {
+                const type = symbolTable[v] || 'int';
+                let displayType = `int ${v}`;
+                if (type === 'float') displayType = `float ${v}`;
+                else if (type === 'char') displayType = `char ${v}`;
+                else if (type === 'string') displayType = `char ${v}[100]`;
+                else if (type.startsWith('array:')) {
+                  const size = type.split(':')[1];
+                  displayType = `int ${v}[${size}]`;
+                }
+                return (
+                  <span key={i} className="px-3 py-1 bg-blue-500/10 border border-blue-500/30 text-blue-300 rounded-md font-mono" id={`sym-${v}`}>
+                    {displayType}
+                  </span>
+                );
+              })}
             </div>
             <p className="text-zinc-500 text-sm mt-4">
               These variables were collected during parsing and will be declared in the generated C code.

@@ -8,19 +8,27 @@ import { ArrowRight, ArrowLeft, TerminalSquare, AlertTriangle } from "lucide-rea
 
 export default function LexerPage() {
   const router = useRouter();
-  const { tokens, lexErrors, code, setParseTree, setParseErrors, setVariables, setCCode } = useStore();
+  const { tokens, lexErrors, code, setParseTree, setParseErrors, setVariables, setCCode, setSymbolTable } = useStore();
   const [isParsing, setIsParsing] = useState(false);
 
   // Stats
   const stats = {
-    keywords: tokens.filter(t => ['START', 'STOP', 'READ', 'PRINT', 'IF', 'THEN', 'ELSE', 'ENDIF', 'FOR', 'TO', 'ENDFOR', 'WHILE', 'DO', 'ENDWHILE'].includes(t.token)).length,
+    keywords: tokens.filter(t => [
+      'START', 'STOP', 'READ', 'PRINT', 'IF', 'THEN', 'ELSE', 'ENDIF', 'FOR', 'TO', 'ENDFOR', 'WHILE', 'DO', 'ENDWHILE',
+      'INT_TYPE', 'FLOAT_TYPE', 'CHAR_TYPE', 'STRING_TYPE', 'SWITCH', 'CASE', 'DEFAULT', 'BREAK', 'ENDSWITCH',
+      'REPEAT', 'UNTIL', 'FUNCTION', 'RETURN', 'ENDFUNCTION', 'ARRAY'
+    ].includes(t.token)).length,
     identifiers: tokens.filter(t => t.token === 'ID').length,
-    operators: tokens.filter(t => ['=', '+', '-', '*', '/', '<', '>', '<=', '>=', '==', ','].includes(t.token)).length,
+    operators: tokens.filter(t => ['=', '+', '-', '*', '/', '<', '>', '<=', '>=', '==', ',', ':', '[', ']'].includes(t.token)).length,
     numbers: tokens.filter(t => t.token === 'NUMBER').length,
   };
 
   const getTokenColor = (token: string) => {
-    if (['START', 'STOP', 'READ', 'PRINT', 'IF', 'THEN', 'ELSE', 'ENDIF', 'FOR', 'TO', 'ENDFOR', 'WHILE', 'DO', 'ENDWHILE'].includes(token)) return "text-purple-400 bg-purple-400/10 border-purple-400/20";
+    if ([
+      'START', 'STOP', 'READ', 'PRINT', 'IF', 'THEN', 'ELSE', 'ENDIF', 'FOR', 'TO', 'ENDFOR', 'WHILE', 'DO', 'ENDWHILE',
+      'INT_TYPE', 'FLOAT_TYPE', 'CHAR_TYPE', 'STRING_TYPE', 'SWITCH', 'CASE', 'DEFAULT', 'BREAK', 'ENDSWITCH',
+      'REPEAT', 'UNTIL', 'FUNCTION', 'RETURN', 'ENDFUNCTION', 'ARRAY'
+    ].includes(token)) return "text-purple-400 bg-purple-400/10 border-purple-400/20";
     if (token === 'ID') return "text-blue-400 bg-blue-400/10 border-blue-400/20";
     if (token === 'NUMBER') return "text-green-400 bg-green-400/10 border-green-400/20";
     if (token === 'EOF') return "text-zinc-500 bg-zinc-500/10 border-zinc-500/20";
@@ -41,6 +49,7 @@ export default function LexerPage() {
       setParseTree(data.tree);
       setParseErrors(data.errors);
       setVariables(data.variables || []);
+      setSymbolTable(data.symbolTable || {});
       
       router.push("/parser");
     } catch (err) {

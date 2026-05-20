@@ -13,6 +13,8 @@ interface StoreState {
   setParseErrors: (errors: any[]) => void;
   variables: string[];
   setVariables: (vars: string[]) => void;
+  symbolTable: Record<string, string>;
+  setSymbolTable: (table: Record<string, string>) => void;
   cCode: string;
   setCCode: (code: string) => void;
 }
@@ -30,6 +32,8 @@ export const useStore = create<StoreState>((set) => ({
   setParseErrors: (parseErrors) => set({ parseErrors }),
   variables: [],
   setVariables: (variables) => set({ variables }),
+  symbolTable: {},
+  setSymbolTable: (symbolTable) => set({ symbolTable }),
   cCode: '',
   setCCode: (cCode) => set({ cCode }),
 }));
