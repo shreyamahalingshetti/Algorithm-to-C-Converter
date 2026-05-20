@@ -15,7 +15,7 @@ export default function LexerPage() {
   const stats = {
     keywords: tokens.filter(t => [
       'START', 'STOP', 'READ', 'PRINT', 'IF', 'THEN', 'ELSE', 'ENDIF', 'FOR', 'TO', 'ENDFOR', 'WHILE', 'DO', 'ENDWHILE',
-      'INT_TYPE', 'FLOAT_TYPE', 'CHAR_TYPE', 'STRING_TYPE', 'SWITCH', 'CASE', 'DEFAULT', 'BREAK', 'ENDSWITCH',
+      'INT_TYPE', 'FLOAT_TYPE', 'CHAR_TYPE', 'STRING_TYPE', 'DOUBLE_TYPE', 'LONG_TYPE', 'SWITCH', 'CASE', 'DEFAULT', 'BREAK', 'ENDSWITCH',
       'REPEAT', 'UNTIL', 'FUNCTION', 'RETURN', 'ENDFUNCTION', 'ARRAY'
     ].includes(t.token)).length,
     identifiers: tokens.filter(t => t.token === 'ID').length,
@@ -26,7 +26,7 @@ export default function LexerPage() {
   const getTokenColor = (token: string) => {
     if ([
       'START', 'STOP', 'READ', 'PRINT', 'IF', 'THEN', 'ELSE', 'ENDIF', 'FOR', 'TO', 'ENDFOR', 'WHILE', 'DO', 'ENDWHILE',
-      'INT_TYPE', 'FLOAT_TYPE', 'CHAR_TYPE', 'STRING_TYPE', 'SWITCH', 'CASE', 'DEFAULT', 'BREAK', 'ENDSWITCH',
+      'INT_TYPE', 'FLOAT_TYPE', 'CHAR_TYPE', 'STRING_TYPE', 'DOUBLE_TYPE', 'LONG_TYPE', 'SWITCH', 'CASE', 'DEFAULT', 'BREAK', 'ENDSWITCH',
       'REPEAT', 'UNTIL', 'FUNCTION', 'RETURN', 'ENDFUNCTION', 'ARRAY'
     ].includes(token)) return "text-purple-400 bg-purple-400/10 border-purple-400/20";
     if (token === 'ID') return "text-blue-400 bg-blue-400/10 border-blue-400/20";

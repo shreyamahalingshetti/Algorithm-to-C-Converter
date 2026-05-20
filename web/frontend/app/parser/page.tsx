@@ -9,7 +9,7 @@ const CFG_RULES = [
   "Program → START Declarations Statements STOP",
   "Declarations → Declaration Declarations | ε",
   "Declaration → DataType ID | ARRAY ID [ NUMBER ]",
-  "DataType → INT | FLOAT | CHAR | STRING",
+  "DataType → INT | FLOAT | CHAR | STRING | DOUBLE | LONG",
   "Statements → Statement Statements | ε",
   "Statement → READ idList",
   "Statement → PRINT expr",
@@ -144,6 +144,8 @@ export default function ParserPage() {
                 if (type === 'float') displayType = `float ${v}`;
                 else if (type === 'char') displayType = `char ${v}`;
                 else if (type === 'string') displayType = `char ${v}[100]`;
+                else if (type === 'double') displayType = `double ${v}`;
+                else if (type === 'long') displayType = `long ${v}`;
                 else if (type.startsWith('array:')) {
                   const size = type.split(':')[1];
                   displayType = `int ${v}[${size}]`;
