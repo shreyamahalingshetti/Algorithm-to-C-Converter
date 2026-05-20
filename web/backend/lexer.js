@@ -6,7 +6,6 @@ class Lexer {
       
       // Keywords
       { regex: /^START\b/, type: 'START' },
-      { regex: /^STOP\b/, type: 'STOP' },
       { regex: /^READ\b/, type: 'READ' },
       { regex: /^PRINT\b/, type: 'PRINT' },
       { regex: /^IF\b/, type: 'IF' },
@@ -19,6 +18,36 @@ class Lexer {
       { regex: /^WHILE\b/, type: 'WHILE' },
       { regex: /^DO\b/, type: 'DO' },
       { regex: /^ENDWHILE\b/, type: 'ENDWHILE' },
+      
+      // Datatypes
+      { regex: /^INT\b/, type: 'INT_TYPE' },
+      { regex: /^FLOAT\b/, type: 'FLOAT_TYPE' },
+      { regex: /^CHAR\b/, type: 'CHAR_TYPE' },
+      { regex: /^STRING\b/, type: 'STRING_TYPE' },
+      { regex: /^DOUBLE\b/, type: 'DOUBLE_TYPE' },
+      { regex: /^LONG\b/, type: 'LONG_TYPE' },
+      
+      // Switch-Case
+      { regex: /^SWITCH\b/, type: 'SWITCH' },
+      { regex: /^CASE\b/, type: 'CASE' },
+      { regex: /^DEFAULT\b/, type: 'DEFAULT' },
+      { regex: /^BREAK\b/, type: 'BREAK' },
+      { regex: /^END\s*SWITCH\b/, type: 'ENDSWITCH' },
+      
+      // Repeat-Until
+      { regex: /^REPEAT\b/, type: 'REPEAT' },
+      { regex: /^UNTIL\b/, type: 'UNTIL' },
+      
+      // Functions
+      { regex: /^FUNCTION\b/, type: 'FUNCTION' },
+      { regex: /^RETURN\b/, type: 'RETURN' },
+      { regex: /^ENDFUNCTION\b/, type: 'ENDFUNCTION' },
+      
+      // Arrays
+      { regex: /^ARRAY\b/, type: 'ARRAY' },
+      
+      // Program Termination (STOP or END)
+      { regex: /^(STOP|END)\b/, type: 'STOP' },
       
       // Numbers
       { regex: /^[0-9]+/, type: 'NUMBER' },
@@ -43,6 +72,9 @@ class Lexer {
       { regex: /^,/, type: ',' },
       { regex: /^\(/, type: '(' },
       { regex: /^\)/, type: ')' },
+      { regex: /^:/, type: ':' },
+      { regex: /^\[/, type: '[' },
+      { regex: /^\]/, type: ']' },
     ];
   }
 

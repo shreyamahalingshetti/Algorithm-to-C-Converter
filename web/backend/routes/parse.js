@@ -22,7 +22,7 @@ router.post('/', (req, res) => {
     const parseResult = parser.parse();
 
     if (generateC && parseResult.valid) {
-        const codegen = new CodeGenerator(parseResult.tree, parseResult.variables);
+        const codegen = new CodeGenerator(parseResult.tree, parseResult.variables, parseResult.symbolTable);
         const cCodeResult = codegen.generate();
         parseResult.cCode = cCodeResult.code;
     }

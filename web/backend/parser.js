@@ -5,6 +5,7 @@ class Parser {
     this.errors = [];
     this.tree = null;
     this.variables = new Set();
+    this.symbolTable = new Map();
   }
 
   parse() {
@@ -19,7 +20,8 @@ class Parser {
       valid: this.errors.length === 0,
       errors: this.errors,
       tree: this.tree,
-      variables: Array.from(this.variables)
+      variables: Array.from(this.variables),
+      symbolTable: Object.fromEntries(this.symbolTable)
     };
   }
 
@@ -74,12 +76,14 @@ class Parser {
 
   // --- Grammar Rules ---
 
-  // program → START statements STOP
+  // program → START declarations statements STOP
   program() {
     const node = { type: 'Program', children: [] };
     try {
       this.consume('START', 'Expected START at beginning of program');
       node.children.push({ type: 'Terminal', value: 'START' });
+
+      node.children.push(this.declarations());
 
       node.children.push(this.statements());
 
@@ -91,12 +95,67 @@ class Parser {
     return node;
   }
 
+  // declarations → declaration*
+  declarations() {
+    const node = { type: 'Declarations', children: [] };
+    while (this.check('INT_TYPE') || this.check('FLOAT_TYPE') || this.check('CHAR_TYPE') || 
+           this.check('STRING_TYPE') || this.check('DOUBLE_TYPE') || this.check('LONG_TYPE') || 
+           this.check('ARRAY')) {
+      try {
+        node.children.push(this.declaration());
+      } catch (e) {
+        this.advance();
+      }
+    }
+    return node;
+  }
+
+  // declaration → DataType ID | ARRAY ID '[' NUMBER ']'
+  declaration() {
+    if (this.match('ARRAY')) {
+      const node = { type: 'ArrayDeclaration', children: [{ type: 'Terminal', value: 'ARRAY' }] };
+      const idToken = this.consume('ID', "Expected array name after ARRAY");
+      this.variables.add(idToken.lexeme);
+      node.children.push({ type: 'Identifier', value: idToken.lexeme });
+      
+      this.consume('[', "Expected '[' after array name");
+      const sizeToken = this.consume('NUMBER', "Expected array size");
+      node.children.push({ type: 'Number', value: sizeToken.lexeme });
+      this.consume(']', "Expected ']' after array size");
+      
+      this.symbolTable.set(idToken.lexeme, `array:${sizeToken.lexeme}`);
+      return node;
+    } else {
+      const node = { type: 'Declaration', children: [] };
+      const typeToken = this.advance(); // INT_TYPE, FLOAT_TYPE, etc.
+      node.children.push({ type: 'DataType', value: typeToken.lexeme });
+      
+      const idToken = this.consume('ID', "Expected variable name after datatype");
+      this.variables.add(idToken.lexeme);
+      node.children.push({ type: 'Identifier', value: idToken.lexeme });
+      
+      // Store in symbol table (standard lowercase type name like int, float, char, string)
+      let typeStr = 'int';
+      if (typeToken.token === 'FLOAT_TYPE') typeStr = 'float';
+      else if (typeToken.token === 'CHAR_TYPE') typeStr = 'char';
+      else if (typeToken.token === 'STRING_TYPE') typeStr = 'string';
+      else if (typeToken.token === 'DOUBLE_TYPE') typeStr = 'double';
+      else if (typeToken.token === 'LONG_TYPE') typeStr = 'long';
+      
+      this.symbolTable.set(idToken.lexeme, typeStr);
+      return node;
+    }
+  }
+
   // statements → statement*
   statements() {
     const node = { type: 'Statements', children: [] };
     while (!this.check('STOP') && !this.check('EOF') && 
            !this.check('ENDIF') && !this.check('ELSE') && 
-           !this.check('ENDFOR') && !this.check('ENDWHILE')) {
+           !this.check('ENDFOR') && !this.check('ENDWHILE') &&
+           !this.check('CASE') && !this.check('DEFAULT') && 
+           !this.check('ENDSWITCH') && !this.check('BREAK') &&
+           !this.check('UNTIL') && !this.check('ENDFUNCTION')) {
       try {
         const stmt = this.statement();
         if (stmt) {
@@ -112,16 +171,20 @@ class Parser {
     return node;
   }
 
-  // statement → READ idList | PRINT idExpr | ID = expr | IF... | FOR... | WHILE...
+  // statement → READ idList | PRINT idExpr | ID = expr | IF... | FOR... | WHILE... | SWITCH... | REPEAT... | FUNCTION... | RETURN...
   statement() {
     if (this.match('READ')) return this.readStatement();
     if (this.match('PRINT')) return this.printStatement();
     if (this.match('IF')) return this.ifStatement();
     if (this.match('FOR')) return this.forStatement();
     if (this.match('WHILE')) return this.whileStatement();
-    if (this.match('ID')) return this.assignmentStatement();
+    if (this.match('SWITCH')) return this.switchStatement();
+    if (this.match('REPEAT')) return this.repeatStatement();
+    if (this.match('FUNCTION')) return this.functionStatement();
+    if (this.match('RETURN')) return this.returnStatement();
+    if (this.check('ID')) return this.assignmentStatement();
     
-    this.error('Expected a valid statement (READ, PRINT, IF, FOR, WHILE, or assignment)');
+    this.error('Expected a valid statement (READ, PRINT, IF, FOR, WHILE, SWITCH, REPEAT, FUNCTION, RETURN, or assignment)');
     throw new Error('Invalid statement');
   }
 
@@ -141,7 +204,6 @@ class Parser {
     const node = { type: 'PrintStatement', children: [{ type: 'Terminal', value: 'PRINT' }] };
     
     // Simplification: We allow printing a variable or expression.
-    // In original it was PRINT ID, but let's allow an expression.
     const e = this.expression();
     node.children.push(e);
     
@@ -149,16 +211,123 @@ class Parser {
   }
 
   assignmentStatement() {
-    const idToken = this.previous();
+    const idToken = this.consume('ID', 'Expected variable name in assignment');
     this.variables.add(idToken.lexeme);
     
-    const node = { type: 'Assignment', children: [{ type: 'Identifier', value: idToken.lexeme }] };
+    const node = { type: 'Assignment', children: [] };
+    
+    if (this.match('[')) {
+      const indexExpr = this.expression();
+      this.consume(']', "Expected ']' after array index");
+      node.children.push({ type: 'ArrayIndex', children: [{ type: 'Identifier', value: idToken.lexeme }, indexExpr] });
+    } else {
+      node.children.push({ type: 'Identifier', value: idToken.lexeme });
+    }
     
     this.consume('=', "Expected '=' in assignment");
     node.children.push({ type: 'Terminal', value: '=' });
     
     node.children.push(this.expression());
     
+    return node;
+  }
+
+  switchStatement() {
+    const node = { type: 'SwitchStatement', children: [{ type: 'Terminal', value: 'SWITCH' }] };
+    
+    const hasParen = this.match('(');
+    node.children.push(this.expression());
+    if (hasParen) {
+      this.consume(')', "Expected ')' after switch expression");
+    }
+    
+    node.children.push(this.cases());
+    
+    this.consume('ENDSWITCH', "Expected ENDSWITCH at end of switch");
+    node.children.push({ type: 'Terminal', value: 'ENDSWITCH' });
+    
+    return node;
+  }
+
+  cases() {
+    const node = { type: 'Cases', children: [] };
+    while (this.check('CASE') || this.check('DEFAULT')) {
+      if (this.check('CASE')) {
+        node.children.push(this.caseItem());
+      } else {
+        node.children.push(this.defaultCaseItem());
+      }
+    }
+    return node;
+  }
+
+  caseItem() {
+    const node = { type: 'Case', children: [{ type: 'Terminal', value: 'CASE' }] };
+    this.consume('CASE', 'Expected CASE');
+    
+    node.children.push(this.expression());
+    this.consume(':', "Expected ':' after case expression");
+    
+    node.children.push(this.statements());
+    
+    if (this.match('BREAK')) {
+      node.children.push({ type: 'Terminal', value: 'BREAK' });
+    }
+    
+    return node;
+  }
+
+  defaultCaseItem() {
+    const node = { type: 'DefaultCase', children: [{ type: 'Terminal', value: 'DEFAULT' }] };
+    this.consume('DEFAULT', 'Expected DEFAULT');
+    
+    this.consume(':', "Expected ':' after default");
+    node.children.push(this.statements());
+    
+    return node;
+  }
+
+  repeatStatement() {
+    const node = { type: 'RepeatStatement', children: [{ type: 'Terminal', value: 'REPEAT' }] };
+    node.children.push(this.statements());
+    
+    this.consume('UNTIL', "Expected UNTIL in REPEAT loop");
+    node.children.push({ type: 'Terminal', value: 'UNTIL' });
+    
+    node.children.push(this.condition());
+    return node;
+  }
+
+  functionStatement() {
+    const node = { type: 'FunctionDeclaration', children: [{ type: 'Terminal', value: 'FUNCTION' }] };
+    const idToken = this.consume('ID', "Expected function name");
+    this.variables.add(idToken.lexeme);
+    node.children.push({ type: 'Identifier', value: idToken.lexeme });
+    
+    this.consume('(', "Expected '(' after function name");
+    
+    const params = { type: 'Parameters', children: [] };
+    if (!this.check(')')) {
+      do {
+        const paramToken = this.consume('ID', "Expected parameter name");
+        this.variables.add(paramToken.lexeme);
+        params.children.push({ type: 'Identifier', value: paramToken.lexeme });
+      } while (this.match(','));
+    }
+    this.consume(')', "Expected ')' after parameters");
+    node.children.push(params);
+    
+    node.children.push(this.statements());
+    
+    this.consume('ENDFUNCTION', "Expected ENDFUNCTION");
+    node.children.push({ type: 'Terminal', value: 'ENDFUNCTION' });
+    
+    return node;
+  }
+
+  returnStatement() {
+    const node = { type: 'ReturnStatement', children: [{ type: 'Terminal', value: 'RETURN' }] };
+    node.children.push(this.expression());
     return node;
   }
 
@@ -278,7 +447,23 @@ class Parser {
       return { type: 'Number', value: this.previous().lexeme };
     }
     if (this.match('ID')) {
-      return { type: 'Identifier', value: this.previous().lexeme };
+      const idToken = this.previous();
+      if (this.match('(')) {
+        const args = { type: 'Arguments', children: [] };
+        if (!this.check(')')) {
+          do {
+            args.children.push(this.expression());
+          } while (this.match(','));
+        }
+        this.consume(')', "Expected ')' after arguments");
+        return { type: 'FunctionCall', children: [{ type: 'Identifier', value: idToken.lexeme }, args] };
+      }
+      if (this.match('[')) {
+        const indexExpr = this.expression();
+        this.consume(']', "Expected ']' after array index");
+        return { type: 'ArrayIndex', children: [{ type: 'Identifier', value: idToken.lexeme }, indexExpr] };
+      }
+      return { type: 'Identifier', value: idToken.lexeme };
     }
     if (this.match('(')) {
       const expr = this.expression();
